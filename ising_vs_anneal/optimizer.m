@@ -5,69 +5,70 @@ clear
 clc
 makedata
 METHOD='iter';
-NEIGHBORHOODSIZE=1;
-n_restart =500;
-rep = 10;
+NEIGHBORHOODSIZE=2;
+n_restart =100;
+rep = 30;
 arrep = zeros(1,rep);
 eminar = zeros(1,rep);
 
+a = 0
 switch METHOD,
 case 'iter'
-    for r=1:rep
-        E_a = 1:n_restart;
-        E_min = 1000;
-        parfor t=1:n_restart
-            % initialize
-            x = 2*(rand(1,n)>0.5)-1;
-    % 		E1 = E(x,w);
-            flag = 1;
-            while flag == 1
-                flag = 0;
-                switch NEIGHBORHOODSIZE,
-                case 1
-                    % choose new x by flipping one bit i
-                    % compute dE directly instead of subtracting E's of
-                    % different states because of efficiency
-                    for i=1:length(x)
-                        fx = x(i) * ( w(i,:)*x' + w(:,i)*x);
+    E_a = zeros(1,n_restart);
+    E_min = 1000;
+    parfor t=1:n_restart
+        % initialize
+        x = 2*(rand(1,n)>0.5)-1;
+% 		E1 = E(x,w);
+        flag = 1;
+        while flag == 1
+            flag = 0;
+            switch NEIGHBORHOODSIZE,
+            case 1
+                % choose new x by flipping one bit i
+                % compute dE directly instead of subtracting E's of
+                % different states because of efficiency
+                for i=1:length(x)
+                    fx = x(i) * ( w(i,:)*x' + w(:,i)*x);
+                    if fx > 0
+                        x(i) = -x(i);
+                        flag = 1;
+                    end
+                end		
+            case 2
+                % choose new x by flipping bits i,j
+                for i=1:length(x)
+                    for j=1:length(x)
+                        fx = x(i) * ( w(i,:)*x' + w(:,i)*x) + x(j) * ( w(j,:)*x' + w(:,j)*x)...
+                            - w(i,j)*x(i)*x(j) - w(j,i)*x(i)*x(j);
                         if fx > 0
                             x(i) = -x(i);
+                            x(j) = -x(j);
                             flag = 1;
                         end
-                    end		
-                case 2
-                    % choose new x by flipping bits i,j
-                    for i=1:length(x)
-                        for j=1:length(x)
-                            fx = x(i) * ( w(i,:)*x' + w(:,i)*x) + x(j) * ( w(j,:)*x' + w(:,j)*x)...
-                                - w(i,j)*x(i)*x(j) - w(j,i)*x(i)*x(j);
-                            if fx > 0
-                                x(i) = -x(i);
-                                x(j) = -x(j);
-                                flag = 1;
-                            end
-                        end
                     end
-                end;
+                end
             end;
-            E1 = E(x,w);
-    % 		E_min = min(E_min,E1);
-            E_a(t) = E1;
         end;
-        E_min = intmax;
-        for i = 1:size(E_a, 2)
-            if E_min > E_a(i)
-                arrep(r) = i ;
-            end
-            E_min = min(E_min, E_a(i));
-            E_a(i) = E_min;
-        end
-        eminar(r) = E_min;
-        figure(r)
-        plot(E_a)
-    end
-    arrep
-    eminar
+        E1 = E(x,w);
+        a = a + 1;
+        a
+% 		E_min = min(E_min,E1);
+        E_a(t) = E1;
+    end;
+%     E_min = intmax;
+%     for i = 1:size(E_a, 2)
+%         if E_min > E_a(i)
+%             arrep(r) = i ;
+%         end
+%         E_min = min(E_min, E_a(i));
+%         E_a(i) = E_min;
+%     end
+%     eminar(r) = E_min;
+%     figure(r)
+%     plot(E_a)
+%     arrep
+%     eminar
 case 'sa'
 	% initialize
 	x = 2*(rand(1,n)>0.5)-1;
