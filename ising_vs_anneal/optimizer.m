@@ -12,9 +12,10 @@ switch METHOD,
 case 'iter'
     E_a = zeros(1,n_restart);
     E_min = 1000;
-    for t=1:n_restart
+    parfor t=1:n_restart
         % initialize
         x = 2*(rand(1,n)>0.5)-1;
+        x0 =x;
 % 		E1 = E(x,w);
         flag = 1;
         while flag == 1
@@ -46,11 +47,18 @@ case 'iter'
                         end
                     end
                 end
-            end;
-        end;
+            end
+        end
         E1 = E(x,w);
         E_a(t) = E1;
-    end;
+    end
+    E_min = intmax;
+    for i = 1:size(E_a, 2)
+        E_min = min(E_min, E_a(i));
+        E_a(i) = E_min;
+    end
+    plot(E_a)
+
 case 'sa'
 	% initialize
 	x = 2*(rand(1,n)>0.5)-1;
