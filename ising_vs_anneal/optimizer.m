@@ -6,8 +6,8 @@ clc
 makedata
 METHOD='iter';
 NEIGHBORHOODSIZE=1;
-n_restart =100;
-rep = 1;
+n_restart =500;
+rep = 10;
 arrep = zeros(1,rep);
 eminar = zeros(1,rep);
 
@@ -32,6 +32,7 @@ case 'iter'
                         fx = x(i) * ( w(i,:)*x' + w(:,i)*x);
                         if fx > 0
                             x(i) = -x(i);
+                            flag = 1;
                         end
                     end		
                 case 2
@@ -43,6 +44,7 @@ case 'iter'
                             if fx > 0
                                 x(i) = -x(i);
                                 x(j) = -x(j);
+                                flag = 1;
                             end
                         end
                     end
