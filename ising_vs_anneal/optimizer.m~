@@ -7,16 +7,15 @@ makedata
 METHOD='iter';
 NEIGHBORHOODSIZE=1;
 n_restart =100;
-rep = 1;
+rep = 100;
 arrep = zeros(1,rep);
-eminar = zeros(1,rep);
 
 switch METHOD,
 case 'iter'
-    for r=1:rep
+    parfor r=1:rep
         E_a = 1:n_restart;
         E_min = 1000;
-        parfor t=1:n_restart
+        for t=1:n_restart
             % initialize
             x = 2*(rand(1,n)>0.5)-1;
     % 		E1 = E(x,w);
@@ -55,17 +54,14 @@ case 'iter'
         E_min = intmax;
         for i = 1:size(E_a, 2)
             if E_min > E_a(i)
-                arrep(r) = i ;
+                arrep(r) = i; 
             end
             E_min = min(E_min, E_a(i));
             E_a(i) = E_min;
         end
-        eminar(r) = E_min;
         figure(r)
         plot(E_a)
     end
-    arrep
-    eminar
 case 'sa'
 	% initialize
 	x = 2*(rand(1,n)>0.5)-1;
