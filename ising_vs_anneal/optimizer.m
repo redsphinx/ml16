@@ -12,14 +12,12 @@ switch METHOD,
 case 'iter'
 E_a = 1:n_restart;
 	E_min = 1000;
-	for t=1:n_restart,
-
+	parfor t=1:n_restart
 		% initialize
 		x = 2*(rand(1,n)>0.5)-1;
 % 		E1 = E(x,w);
 		flag = 1;
-	
-		while flag == 1,
+		while flag == 1
 			flag = 0;
 			switch NEIGHBORHOODSIZE,
 			case 1
@@ -47,11 +45,15 @@ E_a = 1:n_restart;
 			end;
 		end;
         E1 = E(x,w);
-		E_min = min(E_min,E1);
-        E_a(t) = E_min;
+% 		E_min = min(E_min,E1);
+        E_a(t) = E1;
 	end;
-	E_min
-%     plot(E_a)
+    E_min = intmax;
+    for i = 1:size(E_a, 2)
+        E_min = min(E_min, E_a(i));
+        E_a(i) = E_min;
+    end
+    plot(E_a)
 case 'sa'
 	% initialize
 	x = 2*(rand(1,n)>0.5)-1;
