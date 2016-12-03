@@ -1,11 +1,11 @@
 % problem definition
 % minimize E= 0.5 x^T w x, with x=x_1,...,x_n and x_i=0,1
 % w is a symmetric real n x n matrix with zero diagonal
-clear
-clc
-makedata
+% clear
+% clc
+% makedata
 METHOD='iter';
-NEIGHBORHOODSIZE = 2;
+NEIGHBORHOODSIZE = 1;
 n_restart = 100;
 
 switch METHOD,
@@ -15,9 +15,8 @@ case 'iter'
     parfor t=1:n_restart
         % initialize
         x = 2*(rand(1,n)>0.5)-1;
+        sum_x = sum
         x0 =x;
-%         negs = (n-sum(x))/2;
-%         negs
 % 		E1 = E(x,w);
         flag = 1;
         while flag == 1
@@ -52,9 +51,7 @@ case 'iter'
             end
         end
         E1 = E(x,w);
-%         E1
         E_a(t) = E1;
-        
     end
     E_min = intmax;
     for i = 1:size(E_a, 2)
@@ -64,7 +61,7 @@ case 'iter'
     plot(E_a)
     xlabel('Number of Restarts')
     ylabel('E(x,w)')
-    title(strcat({'Frustrated with neighborhood '},num2str(NEIGHBORHOODSIZE)))
+    title(strcat({'Ferromagnetic with neighborhood '},num2str(NEIGHBORHOODSIZE)))
 %     title('Ferromagnetic with neighborhood 2')
     %only for ferromagnetic:
     %optimal x is all ones or -ones. Compare this to our optimized x.
