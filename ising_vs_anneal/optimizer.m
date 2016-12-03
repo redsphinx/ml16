@@ -26,7 +26,7 @@ case 'iter'
                 % compute dE directly instead of subtracting E's of
                 % different states because of efficiency
                 for i=1:length(x)
-                    fx = -(x(i) * ( w(i,:)*x' + w(:,i)*x));
+                    fx = -x(i) * w(i,:)*x';
                     if fx > 0
                         x(i) = -x(i);
                         flag = 1;
@@ -39,7 +39,8 @@ case 'iter'
                         a = x;
                         a(i) = -x(i);
                         a(j) = -x(j);
-                        fx = E(x,w) - E(a,w);
+                        % fx = E(x,w) - E(a,w);
+                        fx = 2 * (-x(i) * w(i,:) * x' - x(j) * w(j,:) * x' + 2*x(i)*x(j)*w(i,j));
                         if fx > 0
                             x(i) = -x(i);
                             x(j) = -x(j);
