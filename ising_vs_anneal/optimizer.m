@@ -6,7 +6,7 @@ clear
 clc
 makedata
 METHOD='sa';
-NEIGHBORHOODSIZE = 2;
+NEIGHBORHOODSIZE = 1;
 n_restart = 100;
 
 switch METHOD,
@@ -80,8 +80,9 @@ case 'sa'
 	x = 2*(rand(1,n)>0.5)-1;
 	E1 = E(x,w);
 	E_outer=zeros(1,100);	%stores mean energy at each temperature
-	E_bar=zeros(1,100);		% stores std energy at each temperature
-
+	E_outer_per_spin=zeros(1,100); %stores mean energy per spin at each temperature
+    E_bar=zeros(1,100);		% stores std energy at each temperature
+    E_bar_per_spin=zeros(1,100);
 	% initialize temperature
 	max_dE=0;
 	switch NEIGHBORHOODSIZE,
@@ -105,6 +106,8 @@ case 'sa'
 		beta=beta*factor;
         betas = [betas beta];
     	E_all=zeros(1,T1);
+        E_all_per_spin=zeros(1,T1);
+
 		for t1=1:T1,
 			switch NEIGHBORHOODSIZE,
 			case 1,
@@ -131,9 +134,12 @@ case 'sa'
 			% E1 is energy of new state
             E1 = E(x, w);
 			E_all(t1)=E1;
+            E_all_per_spin(t1)=E1/n;
 		end;
 		E_outer(t2)=mean(E_all);
+        E_outer_per_spin(t2)=mean(E_all_per_spin);
 		E_bar(t2)=std(E_all);
+        E_bar_per_spin(t2)=std(E_all_per_spin);
 		[t2 beta E_outer(t2) E_bar(t2)] % observe convergence
         if (E_bar(t2) == 0 && convergence_point == -1) 
             convergence_point = t2;
@@ -141,10 +147,12 @@ case 'sa'
 	end;
 	E_min=E_all(1) % minimal energy 
 end;
-semilogx(1 ./ betas, E_outer(1:t2),...
-         1 ./ betas, E_bar(1:t2))
+% semilogx(1 ./ betas, E_outer(1:t2),...
+%          1 ./ betas, E_bar(1:t2))
+semilogx(1 ./ betas, E_outer_per_spin(1:t2),...
+         1 ./ betas, E_bar_per_spin(1:t2))
 legend('Mean Energy', 'std of Energy')
 xlabel('Temperature')
-ylabel('Energy')
-title(strcat('Neighborhood=', int2str(NEIGHBORHOODSIZE),', T1=',int2str(T1)));
+ylabel('Energy per spin')
+title(strcat('Ferromagnetic, Neighborhood=', int2str(NEIGHBORHOODSIZE),', T1=',int2str(T1)));
 
