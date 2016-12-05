@@ -95,14 +95,16 @@ case 'sa'
 	beta_init=1/max_dE;	% sets initial temperature
 	T1=1000; % length markov chain at fixed temperature
 	factor=1.05 ; % increment of beta at each new chain
-
+    betas = [beta_init];
 	beta=beta_init;
 	E_bar(1)=1;
 	t2=1;
-	while E_bar(t2) > 0,
+    convergence_point = -1;
+	while E_bar(t2) > 0 || t2 < (1.3 * convergence_point),
 		t2=t2+1;
 		beta=beta*factor;
-		E_all=zeros(1,T1);
+        betas = [betas beta];
+    	E_all=zeros(1,T1);
 		for t1=1:T1,
 			switch NEIGHBORHOODSIZE,
 			case 1,
@@ -133,10 +135,13 @@ case 'sa'
 		E_outer(t2)=mean(E_all);
 		E_bar(t2)=std(E_all);
 		[t2 beta E_outer(t2) E_bar(t2)] % observe convergence
+        if (E_bar(t2) == 0 && convergence_point == -1) 
+            convergence_point = t2;
+        end
 	end;
 	E_min=E_all(1) % minimal energy 
 end;
-semilogx(1 ./ (beta_init * repmat(factor,[1 n]) .^ 1:t2), E_outer(1:t2),...
-     1 ./ (beta_init * repmat(factor,[1 n]) .^ 1:t2),E_bar(1:t2))
+semilogx(1 ./ betas, E_outer(1:t2),...
+         1 ./ betas, E_bar(1:t2))
  legend('mean', 'std')
 
