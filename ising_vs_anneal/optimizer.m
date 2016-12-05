@@ -29,8 +29,8 @@ case 'iter'
                 % compute dE directly instead of subtracting E's of
                 % different states because of efficiency
                 for i=1:length(x)
-                    fx = -2 * x(i) * w(i,:) * x';
-                    if fx > 0
+                    de = -2 * x(i) * w(i,:) * x';
+                    if de > 0
                         x(i) = -x(i);
                         flag = 1;
                     end
@@ -42,9 +42,9 @@ case 'iter'
                         a = x;
                         a(i) = -x(i);
                         a(j) = -x(j);
-                        % fx = E(x,w) - E(a,w);
-                        fx = 2 * (-x(i) * w(i,:) * x' - x(j) * w(j,:) * x' + 2*x(i)*x(j)*w(i,j));
-                        if fx > 0
+                        % de = E(x,w) - E(a,w);
+                        de = 2 * (-x(i) * w(i,:) * x' - x(j) * w(j,:) * x' + 2*x(i)*x(j)*w(i,j));
+                        if de > 0
                             x(i) = -x(i);
                             x(j) = -x(j);
                             flag = 1;
@@ -111,8 +111,8 @@ case 'sa'
                 % choose new x by flipping one random bit i
 				% perform Metropolis Hasting step
                 i = randi(n);
-                fx = 2 * x(i) * w(i,:) * x';
-                a = exp(-beta*fx);
+                de = 2 * x(i) * w(i,:) * x';
+                a = exp(-beta*de);
                 if a > rand
                     x(i)=-x(i);
                 end
@@ -121,8 +121,8 @@ case 'sa'
 				% perform Metropolis Hasting step
                 i = randi(n);
                 j = randi(n);
-                fx = 2 * (x(i) * w(i,:) * x' + x(j) * w(j,:) * x' - 2*x(i)*x(j)*w(i,j));
-                a = exp(-beta*fx);
+                de = 2 * (x(i) * w(i,:) * x' + x(j) * w(j,:) * x' - 2*x(i)*x(j)*w(i,j));
+                a = exp(-beta*de);
                 if a > rand
                     x(i)=-x(i);
                     x(j)=-x(j);
