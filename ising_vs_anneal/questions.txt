@@ -9,3 +9,7 @@ Frustrated iterative improvement
 
 General
 - Where can we find more information in study material about iterative improvement? maybe it's in the book?
+
+---
+Anneal
+q1: dE, do you mean theoretic, or the specific one with generated x?
