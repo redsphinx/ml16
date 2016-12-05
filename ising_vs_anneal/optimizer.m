@@ -143,5 +143,8 @@ case 'sa'
 end;
 semilogx(1 ./ betas, E_outer(1:t2),...
          1 ./ betas, E_bar(1:t2))
- legend('mean', 'std')
+legend('Mean Energy', 'std of Energy')
+xlabel('Temperature')
+ylabel('Energy')
+title(strcat('Neighborhood=', int2str(NEIGHBORHOODSIZE),', T1=',int2str(T1)));
 
