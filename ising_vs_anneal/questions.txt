@@ -7,4 +7,5 @@ Frustrated iterative improvement
 - Depending on the w, the number of restarts can vary. Is that answer satisfactory? Shall we come up with a number?
 - If we should come up with a number, how can we do it?
 
-
+General
+- Where can we find more information in study material about iterative improvement? maybe it's in the book?
