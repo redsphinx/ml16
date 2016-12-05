@@ -4,8 +4,8 @@
 clear
 clc
 makedata
-METHOD='iter';
-NEIGHBORHOODSIZE = 2;
+METHOD='sa';
+NEIGHBORHOODSIZE = 1;
 n_restart = 100;
 
 switch METHOD,
@@ -28,7 +28,7 @@ case 'iter'
                 % compute dE directly instead of subtracting E's of
                 % different states because of efficiency
                 for i=1:length(x)
-                    fx = -x(i) * w(i,:)*x';
+                    fx = -2 * x(i) * w(i,:) * x';
                     if fx > 0
                         x(i) = -x(i);
                         flag = 1;
@@ -86,8 +86,10 @@ case 'sa'
 	switch NEIGHBORHOODSIZE,
         case 1,
 			% estimate maximum dE in single spin flip
+            max_dE = 2*n;
         case 2,
 			% estimate maximum dE in pair spin flip
+            max_dE = 4*n;
         end;
 	beta_init=1/max_dE;	% sets initial temperature
 	T1=1000; % length markov chain at fixed temperature
@@ -103,13 +105,26 @@ case 'sa'
 		for t1=1:T1,
 			switch NEIGHBORHOODSIZE,
 			case 1,
-				% choose new x by flipping one random bit i
+                % choose new x by flipping one random bit i
 				% perform Metropolis Hasting step
+                i = randi(n);
+                fx = -2 * x(i) * w(i,:) * x';
+                if fx > 0
+                    x(i)=-x(i);
+                end
 			case 2,
-				% choose new x by flipping random bits i,j
+                % choose new x by flipping random bits i,j
 				% perform Metropolis Hasting step
+                i = randi(n);
+                j = randi(n);
+                fx = 2 * (-x(i) * w(i,:) * x' - x(j) * w(j,:) * x' + 2*x(i)*x(j)*w(i,j));
+                if fx > 0
+                    x(i)=-x(i);
+                    x(j)=-x(j);
+                end
 			end;
 			% E1 is energy of new state
+            E1 = E(x, w);
 			E_all(t1)=E1;
 		end;
 		E_outer(t2)=mean(E_all);
@@ -118,5 +133,7 @@ case 'sa'
 	end;
 	E_min=E_all(1) % minimal energy 
 end;
-% plot(1:t2,E_outer(1:t2),1:t2,E_bar(1:t2))
+semilogx(1 ./ (beta_init * repmat(factor,[1 n]) .^ 1:t2), E_outer(1:t2),...
+     1 ./ (beta_init * repmat(factor,[1 n]) .^ 1:t2),E_bar(1:t2))
+ legend('mean', 'std')
 
