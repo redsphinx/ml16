@@ -1,11 +1,12 @@
 % problem definition
 % minimize E= 0.5 x^T w x, with x=x_1,...,x_n and x_i=0,1
 % w is a symmetric real n x n matrix with zero diagonal
+rand('state', 123);
 clear
 clc
 makedata
 METHOD='sa';
-NEIGHBORHOODSIZE = 1;
+NEIGHBORHOODSIZE = 2;
 n_restart = 100;
 
 switch METHOD,
@@ -108,8 +109,9 @@ case 'sa'
                 % choose new x by flipping one random bit i
 				% perform Metropolis Hasting step
                 i = randi(n);
-                fx = -2 * x(i) * w(i,:) * x';
-                if fx > 0
+                fx = 2 * x(i) * w(i,:) * x';
+                a = exp(-beta*fx);
+                if a > rand
                     x(i)=-x(i);
                 end
 			case 2,
@@ -117,8 +119,9 @@ case 'sa'
 				% perform Metropolis Hasting step
                 i = randi(n);
                 j = randi(n);
-                fx = 2 * (-x(i) * w(i,:) * x' - x(j) * w(j,:) * x' + 2*x(i)*x(j)*w(i,j));
-                if fx > 0
+                fx = 2 * (x(i) * w(i,:) * x' + x(j) * w(j,:) * x' - 2*x(i)*x(j)*w(i,j));
+                a = exp(-beta*fx);
+                if a > rand
                     x(i)=-x(i);
                     x(j)=-x(j);
                 end
