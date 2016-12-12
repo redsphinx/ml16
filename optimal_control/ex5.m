@@ -67,7 +67,7 @@ end
 
 % boxplot(maxhist)
 lambda = 0.1 * nu;
-Jtable(ix, iv) = -lambda * log(sum(exp(-phihist(ix, iv, seed)/lambda))/numtries);
+Jtable(ix, iv) = -lambda * log(sum(exp(-phihist(ix, iv, :)/lambda), 3)/numtries);
 
 end
 end
