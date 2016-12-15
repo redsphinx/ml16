@@ -15,8 +15,8 @@ learning_rate = 0.04;
 % calculating clamped statistics
 % <s_i>_c
 clamped_state_expectations = sum(training_dataset, 2)'/T; % 1xN
-% <s_{ij}>_c
-clamped_state_correlation_expectations = training_dataset * training_dataset' / T; % NxN
+% <s_is_j>_c
+clamped_state_coupling_expectations = training_dataset * training_dataset' / T; % NxN
 
 % array to hold convergence data
 delta_ws = zeros(1,K);
@@ -28,10 +28,10 @@ for learning_step = 1:K
     % calculating free statistics
     % <s_i>
     free_state_expectations = p_s * training_dataset'; % 1xN
-    % <s_{ij}>
-    free_state_correlation_expectations = (training_dataset .* repmat(p_s, N, 1)) * training_dataset';
-    % delta_w = <s_{ij}>_c - <s_{ij}>
-    delta_w = clamped_state_correlation_expectations - free_state_correlation_expectations;
+    % <s_is_j>
+    free_state_coupling_expectations = (training_dataset .* repmat(p_s, N, 1)) * training_dataset';
+    % delta_w = <s_is_j>_c - <s_is_j>
+    delta_w = clamped_state_coupling_expectations - free_state_coupling_expectations;
     % set diagonal of delta_w to 0
     delta_w(1:N+1:N*N) = 0;
     
