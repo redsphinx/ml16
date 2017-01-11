@@ -19,7 +19,7 @@ vs = -2:1:2;
 
 % Relevant quantities
 L = @(x) -1 -0.5*(tanh(2*x + 2) - tanh(2*x - 2));
-Lderiv = @(x) -0.5*(2*sech(2*x + 2).^2 - 2*sech(2 - 2*x).^2);
+Lderiv = @(x) sech(2 - 2*x).^2 - sech(2*x + 2).^2;
 Fg = @(x) (-g*Lderiv(x)) ./ sqrt(1 + Lderiv(x).^2);
 
 %{
