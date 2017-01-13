@@ -78,7 +78,7 @@ parfor ix = 1:constant_numel_xs
 end
 
 lambda = 0.1 * nu;
-Jtable = -lambda * log(sum(exp(-phihist)/lambda, 3)/numtries);
+Jtable = -lambda * log(sum(exp(-phihist/lambda), 3)/numtries);
 
 [X,V] = ndgrid(xs,vs);
 surf(X, V, Jtable)
