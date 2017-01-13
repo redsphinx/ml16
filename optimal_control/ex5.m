@@ -14,8 +14,8 @@ A = -1;
 
 % Plotting parameters
 numtries = 10;
-xs = -2:0.8:2;
-vs = -2:1:2;
+xs = -2:0.1:2;
+vs = -2:0.1:2;
 
 % Relevant quantities
 L = @(x) -1 -0.5*(tanh(2*x + 2) - tanh(2*x - 2));
@@ -30,10 +30,15 @@ xlabel('x')
 %}
 
 % Prepare measurements
-phihist = NaN(numel(xs), numel(vs), numtries);
 
-for ix = 1:numel(xs)
-    for iv = 1:numel(vs)
+
+constant_numel_xs = numel(xs);
+constant_numel_vs = numel(vs);
+
+phihist = zeros(constant_numel_xs, constant_numel_vs, numtries);
+
+parfor ix = 1:constant_numel_xs
+    for iv = 1:constant_numel_vs
         fprintf('.')
 
         maxhist = NaN(1, numtries);
