@@ -5,7 +5,7 @@ dummydata
 % TODO: change code to handle more than 1 layer
 % TODO: change code to handle different learning methods
 % TODO: change output such that it classifies, so add sigmoid
-%%
+
 clearvars -except X T X1 X2 x1 x2
 % implement neural net
 D = 2; % nodes in input layer
@@ -27,7 +27,7 @@ for i = 1:L+1
     end
 end
 % TODO: remove bias component later
-%%
+
 % initial approximation with random weights
 Y = zeros(length(X),1); % store our predections for each datapoint
 Z = cell(L+1, 1); % tanh(activation)
@@ -42,43 +42,52 @@ for i = 1:length(X)
     end
     Y(i) = Z{end}(1); % remove the bias term
 end
-surf(X1, X2, reshape(Y, length(x1), length(x2)))
-xlabel('x1')
-ylabel('x2')
-title(sprintf('Neural Network at epoch 0'))
+% surf(X1, X2, reshape(Y, length(x1), length(x2)))
+% xlabel('x1')
+% ylabel('x2')
+% title(sprintf('Neural Network at epoch 0'))
 %%
-% A4E2_3
+
+eta = 0.1; % learning rate
 number_of_epochs = 20;
 interval = 2;
 number_of_plots = number_of_epochs / interval;
 plot_counter = 0;
-% learning rate
-eta = 0.1;
-
-%to plot the initial approximation with random weights
-subplot(2,number_of_plots/2,1)
-surf(X1, X2, reshape(Y, length(x1), length(x2)))
-axis square
-title(sprintf('epoch 0'))
-Y = zeros(length(X),1);
 
 for epoch = 1:number_of_epochs
     epoch
+    Deltas = cell(L+1,1); % store the errors
     for i = 1:length(X)
+        % forward pass
         x = [X(i,:) 1];
-        z = [tanh(x * W1) 1];
-        y = z * W2;
-        Y(i) = y;
+        Z{1} = tanh(x * Weights{1});
+        for j=2:L+1
+            Z{j} = tanh(Z{j-1} * Weights{j});
+        end
+        Y(i) = Z{end}(1);
+        
         % backpropagation
-        delta_k = y - T(i);
-        delta_j = (1 - z.^2) .* (W2' * delta_k); % (1x(M+1))
-        delta_j = delta_j(1:M); %remove the last "bias" item
+        Deltas{1} = Y(i) - T(i); % delta_k
+        for j=2:L+1
+%             Deltas{j} = (1 - Z{j-1}.^2) .* (Weights{j}' * Deltas{j-1});
+            Deltas{j} = (1 - Z{j-1}.^2) * (Weights{j} * Deltas{j-1});
+        end
+        Deltas = flip(Deltas);
+        
+%         delta_j = (1 - z.^2) .* (W2' * delta_k); % (1x(M+1))
+%         delta_j = delta_j(1:M); %remove the last "bias" item
         % (1 - z^2): da/dW1
-        dEdW1 = delta_j' * x;
-        dEdW2 = delta_k * z';
-
-        W1 = W1 - eta * dEdW1';
-        W2 = W2 - eta * dEdW2;
+        
+        Weights{1} = Weights{1} - eta * x' * Deltas{1};
+        for j=2:L+1
+            Weights{j} = Weights{j} - eta * (Z{j-1}' * Deltas{j});
+        end
+        
+%         dEdW1 = delta_j' * x;
+%         dEdW2 = delta_k * z';
+% 
+%         W1 = W1 - eta * dEdW1';
+%         W2 = W2 - eta * dEdW2;
     end
     if(mod(epoch,interval) == 0)
         plot_counter = plot_counter + 1;
