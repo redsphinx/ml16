@@ -1,15 +1,31 @@
+clc
+clear
 dummydata
-% TODO: make data for actual X and labels Y
+% TODO: import data for actual X and labels Y
 % TODO: change code to handle more than 1 layer
 % TODO: change code to handle different learning methods
 %%
 % implement neural net
-D = 2; % input nodes
-L = 1; % number of layers
-M = 8; % hidden nodes 
-% weights, with bias implied (in the +1)
-W1 = rand(D + 1, M) - 0.5;
-W2 = rand(M + 1, 1) - 0.5;
+D = 2; % nodes in input layer
+O = 1; % nodes in output layer
+L = 1; % number of hidden layers (so not input and not output)
+M = 8; % nodes in a hidden layer
+
+% we have L + 1 weight matrices 
+Weights = cell(L+1, 1);
+for i = 1:L+1
+    if i ~= 1 && i ~= L+1
+        Weights{i} = create_weight_matrix(M, M);
+    elseif i == 1
+        % bias implied in the "+1"
+        Weights{i} = create_weight_matrix(D+1, M);
+    elseif i == L+1
+        % bias implied in the "+1"
+        Weights{i} = create_weight_matrix(M+1, O);
+    end
+    
+end
+%%
 % learning rate
 eta = 0.1;
 
@@ -25,7 +41,7 @@ end
 % xlabel('x1')
 % ylabel('x2')
 % title(sprintf('Neural Network at epoch 0'))
-
+%%
 % A4E2_3
 number_of_epochs = 20;
 interval = 2;
