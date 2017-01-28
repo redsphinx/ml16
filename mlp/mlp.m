@@ -1,14 +1,17 @@
 clc
 clear
 [X, T] = create_training_data(1, 8);
+X = reshape(X, size(X,1)^2, size(X,3))';
+% create one-hot-encoding for T, with first argument in 
+%create_training_data=1 and second argument in create_training_data=0
+T = ohe(T, 1, 0); 
 % TODO: change code to handle different learning methods
 % TODO: change output such that it classifies, so add sigmoid
 
 clearvars -except X T X1 X2 x1 x2
 % implement neural net
-D = 2; % nodes in input layer, dependent on data
-O = 1; % nodes in output layer, dependent on data
-
+D = size(X,2); % nodes in input layer
+O = 2; % nodes in output layer. we have 2 classes
 L = 1; % number of hidden layers (so not input and not output)
 M = 8; % nodes in a hidden layer
 
