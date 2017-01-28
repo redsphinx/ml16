@@ -8,10 +8,11 @@ dummydata
 
 clearvars -except X T X1 X2 x1 x2
 % implement neural net
-D = 2; % nodes in input layer
-O = 1; % nodes in output layer
-L = 1; % number of hidden layers (so not input and not output)
-M = 8; % nodes in a hidden layer
+D = 2; % nodes in input layer, dependent on data
+O = 1; % nodes in output layer, dependent on data
+
+L = 3; % number of hidden layers (so not input and not output)
+M = 3; % nodes in a hidden layer
 
 % we have L + 1 weight matrices 
 Weights = cell(L+1, 1);
@@ -28,7 +29,15 @@ for i = 1:L+1
 end
 
 % % we have L + 1 biases
-Bias = rand(L+1, 1) - 0.5;
+% Bias = rand(L+1, 1) - 0.5;
+Bias = cell(L+1, 1);
+for i = 1:L+1
+    if i == L+1
+        Bias{i} = rand() - 0.5;
+    else
+        Bias{i} = rand(M, 1) - 0.5;
+    end
+end
 
 % initial approximation with random weights
 Y = zeros(length(X),1); % store our predections for each datapoint
@@ -36,9 +45,12 @@ Z = cell(L+1, 1); % tanh(activation)
 
 for i = 1:length(X)
     x = X(i,:);
-    Z{1} = tanh(x * Weights{1} + Bias(1));
+%     Z{1} = tanh(x * Weights{1} + Bias(1));
+	Z{1} = tanh(x * Weights{1} + Bias{1}');
+
     for j=2:L+1
-        Z{j} = tanh(Z{j-1} * Weights{j}) + Bias(j);
+%         Z{j} = tanh(Z{j-1} * Weights{j}) + Bias(j);
+        Z{j} = tanh(Z{j-1} * Weights{j}+ Bias{j}') ;
     end
     if O == 1
         Y(i) = Z{end};  
@@ -46,15 +58,10 @@ for i = 1:length(X)
         Y(i) = sigmf(Z{end}); %  sigmoid to create classification predictions when we have 2 classes or more
     end
 end
-% surf(X1, X2, reshape(Y, length(x1), length(x2)))
-% xlabel('x1')
-% ylabel('x2')
-% title(sprintf('Neural Network at epoch 0'))
 
-
-eta = 0.001; % learning rate
+eta = 0.01; % learning rate
 number_of_epochs = 100;
-interval = 50;
+interval = 10;
 number_of_plots = number_of_epochs / interval;
 plot_counter = 0;
 
@@ -64,9 +71,9 @@ for epoch = 1:number_of_epochs
     for i = 1:length(X)
         % forward pass
         x = X(i,:);
-        Z{1} = tanh(x * Weights{1} + Bias(1));
+        Z{1} = tanh(x * Weights{1} + Bias{1}');
         for j=2:L+1
-            Z{j} = tanh(Z{j-1} * Weights{j}) + Bias(j);
+            Z{j} = tanh(Z{j-1} * Weights{j} + Bias{j}') ;
         end
         Y(i) = Z{end};
 
@@ -77,12 +84,16 @@ for epoch = 1:number_of_epochs
         for j=2:L+1
             k = ks(j-1);
             Deltas{j} = (1 - Z{k}.^2)' .* ( (Weights{k} * Deltas{j-1}) ); % fixed
+%             Deltas{j} = (1 - Z{k-1}.^2)' .* ( (Weights{k} * Deltas{j-1}) );
         end
         Deltas = flip(Deltas);
         
+        % update weights and biases
         Weights{1} = Weights{1} - (eta * Deltas{1} * x)'; % fixed
+        Bias{1} = Bias{1} - (eta * Deltas{1});
         for j=2:L+1
             Weights{j} = Weights{j} - eta * (Deltas{j} * Z{j-1})';
+            Bias{j} = Bias{j} - eta * Deltas{j};
         end
         
     end
