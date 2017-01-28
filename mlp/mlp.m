@@ -11,7 +11,7 @@ T = ohe(T, 1, 0);
 clearvars -except X T X1 X2 x1 x2
 % implement neural net
 D = size(X,2); % nodes in input layer
-O = 2; % nodes in output layer. we have 2 classes
+O = 1; % nodes in output layer. we have 2 classes
 L = 1; % number of hidden layers (so not input and not output)
 M = 8; % nodes in a hidden layer
 
@@ -53,21 +53,24 @@ for i = 1:length(X)
 %         Z{j} = tanh(Z{j-1} * Weights{j}) + Bias(j);
         Z{j} = tanh(Z{j-1} * Weights{j}+ Bias{j}') ;
     end
-    if O == 1
-        Y(i) = Z{end};  
-    else
-        Y(i) = sigmf(Z{end}); %  sigmoid to create classification predictions when we have 2 classes or more
-    end
+    Y(i) = round(sigmf(Z{end}));
+%     if O == 1
+%         Y(i) = Z{end};  
+%     else
+%         Y(i) = sigmf(Z{end}); %  sigmoid to create classification predictions when we have 2 classes or more
+%     end
 end
 
 eta = 0.01; % learning rate
-number_of_epochs = 700;
-interval = 70;
+number_of_epochs = 10;
+interval = number_of_epochs / 10;
 number_of_plots = number_of_epochs / interval;
 plot_counter = 0;
 
+mean_error_per_epoch = zeros(number_of_epochs, 1);
 for epoch = 1:number_of_epochs
     epoch
+    total_error = zeros(length(X),1);
     Deltas = cell(L+1,1); % store the errors
     for i = 1:length(X)
         % forward pass
@@ -76,10 +79,12 @@ for epoch = 1:number_of_epochs
         for j=2:L+1
             Z{j} = tanh(Z{j-1} * Weights{j} + Bias{j}') ;
         end
-        Y(i) = Z{end};
+%         Y(i) = Z{end};
+        Y(i) = round(sigmf(Z{end}));
 
         % backpropagation
         Deltas{1} = Y(i) - T(i); % delta_k
+        total_error(i) = Deltas{1};
         ks = 2:L+1;
         ks = flip(ks);
         for j=2:L+1
@@ -98,16 +103,19 @@ for epoch = 1:number_of_epochs
         end
         
     end
-    if(mod(epoch,interval) == 0)
-        plot_counter = plot_counter + 1;
-%         sprintf('plot')
-%         figure;
-%         surf(X1, X2, reshape(Yhat, length(x1), length(x2)))
+    mean_error_per_epoch(epoch) = mean(total_error);
+%     % plot error per instance
+%     if(mod(epoch,interval) == 0)
+%         plot_counter = plot_counter + 1;
+%         subplot(2,number_of_plots/2,plot_counter)
+% %         surf(X1, X2, reshape(Y, length(x1), length(x2)))
+%         plot(1:length(T), total_error')
+%         axis square
 %         title(sprintf('epoch: %d',epoch))
-
-        subplot(2,number_of_plots/2,plot_counter)
-        surf(X1, X2, reshape(Y, length(x1), length(x2)))
-        axis square
-        title(sprintf('epoch: %d',epoch))
-    end
+%     end
 end
+
+plot(1:number_of_epochs, mean_error_per_epoch)
+axis square
+xlabel('epoch')
+ylabel('Error')
