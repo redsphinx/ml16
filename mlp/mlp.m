@@ -1,8 +1,6 @@
 clc
 clear
-dummydata
-% TODO: import data for actual X and labels T
-% TODO: change code to handle more than 1 layer
+[X, T] = create_training_data(1, 8);
 % TODO: change code to handle different learning methods
 % TODO: change output such that it classifies, so add sigmoid
 
@@ -11,8 +9,8 @@ clearvars -except X T X1 X2 x1 x2
 D = 2; % nodes in input layer, dependent on data
 O = 1; % nodes in output layer, dependent on data
 
-L = 3; % number of hidden layers (so not input and not output)
-M = 3; % nodes in a hidden layer
+L = 1; % number of hidden layers (so not input and not output)
+M = 8; % nodes in a hidden layer
 
 % we have L + 1 weight matrices 
 Weights = cell(L+1, 1);
@@ -60,8 +58,8 @@ for i = 1:length(X)
 end
 
 eta = 0.01; % learning rate
-number_of_epochs = 100;
-interval = 10;
+number_of_epochs = 700;
+interval = 70;
 number_of_plots = number_of_epochs / interval;
 plot_counter = 0;
 
