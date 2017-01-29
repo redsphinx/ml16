@@ -5,6 +5,10 @@ X = reshape(X, size(X,1)^2, size(X,3))';
 X = X>0;
 [matching_table, T] = ohe(T); 
 % TODO: change code to handle different learning methods
+mini_batch_size = 20;
+% make things fit the mini batch size so that we don't get weird results.
+X=X(1:length(X) - mod(length(X),mini_batch_size),:);
+T=T(1:length(X),:);
 
 % implement neural net
 D = size(X,2); % nodes in input layer
@@ -35,10 +39,10 @@ for i = 1:L+1
 end
 
 % initial approximation with random weights
-Y = zeros(length(X),O); % store our predections for each datapoint
+Y = zeros(length(X), O); % store our predections for each datapoint
 Z = cell(L+1, 1); % tanh(activation)
 
-eta = 0.1; % learning rate
+eta = 0.01; % learning rate
 number_of_epochs = 5;
 
 mean_error_per_epoch = zeros(number_of_epochs, 1);
@@ -46,33 +50,34 @@ for epoch = 1:number_of_epochs
     epoch
     total_error = zeros(length(X),1);
     Deltas = cell(L+1,1); % store the errors
-    for i = 1:length(X)
+    for i = 1:mini_batch_size:length(X)
+        mini_batch_range = i:i+mini_batch_size-1;
         % forward pass
-        x = X(i,:);
-        Z{1} = tanh(x * Weights{1} + Bias{1}');
+        x = X(mini_batch_range,:);
+        Z{1} = tanh(x * Weights{1} + repmat(Bias{1}',mini_batch_size, 1));
         for j=2:L+1
-            Z{j} = tanh(Z{j-1} * Weights{j} + Bias{j}') ;
+            Z{j} = tanh(Z{j-1} * Weights{j} + repmat(Bias{j}',mini_batch_size, 1)) ;
         end
-        Y(i,:) = Z{end};
+        Y(mini_batch_range,:) = Z{end};
         % softmax the output
 %         a = exp(Y(i,1)) / (exp(Y(i,1)) + exp(Y(i,2)));
 %         b = exp(Y(i,2)) / (exp(Y(i,1)) + exp(Y(i,2)));
 %         Y(i,:) = [a,b];
         
         % backpropagation
-        Deltas{end} = Y(i,:) - T(i,:); % delta_k
-        [class_value, index] = max(T(i,:));
-        [max_logit, prediction] = max(Deltas{end});
-        total_error(i) = prediction ~= index;
+        Deltas{end} = mean(Y(mini_batch_range,:) - T(mini_batch_range,:)); % delta_k
+        [class_value, index] = max(T(mini_batch_range,:)');
+        [max_logit, prediction] = max(Y(mini_batch_range,:)');
+        total_error(mini_batch_range) = prediction ~= index;
         for j=L:-1:1
-            Deltas{j} = (1 - Z{j}.^2) .* (Weights{j+1} * Deltas{j+1}')';
+            Deltas{j} = (1 - mean(Z{j}).^2) .* (Weights{j+1} * Deltas{j+1}')';
         end
         
         % update weights and biases
-        Weights{1} = Weights{1} - ( x'* Deltas{1} * eta);
+        Weights{1} = Weights{1} - ( mean(x)'* Deltas{1} * eta);
         Bias{1} = Bias{1} - eta * Deltas{1}'; %assumption
         for j=2:L+1
-            Weights{j} = Weights{j} - (eta * Deltas{j}' * Z{j-1})';
+            Weights{j} = Weights{j} - (eta * Deltas{j}' * mean(Z{j-1}))';
             Bias{j} = Bias{j} - eta * Deltas{j}';
         end
         
