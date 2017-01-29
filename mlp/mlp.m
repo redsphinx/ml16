@@ -4,8 +4,17 @@ clear
 X = reshape(X, size(X,1)^2, size(X,3))';
 X = X>0;
 [matching_table, T] = ohe(T); 
+LEARNING_METHODS = {'gd', 'sgd'}; % id of these is the learning method, 1 for gd, 2 for sgd.
+LEARNING_METHOD = 1;
+
 % TODO: change code to handle different learning methods
 mini_batch_size = 64;
+
+if LEARNING_METHOD == 2
+    mini_batch_size = length(X);
+end
+
+
 % make things fit the mini batch size so that we don't get weird results.
 X=X(1:length(X) - mod(length(X),mini_batch_size),:);
 T=T(1:length(X),:);
@@ -13,8 +22,8 @@ T=T(1:length(X),:);
 % implement neural net
 D = size(X,2); % nodes in input layer
 O = size(T,2); % nodes in output layer. we have 2 classes
-L = 6; % number of hidden layers (so not input and not output)
-M = 256; % nodes in a hidden layer
+L = 1; % number of hidden layers (so not input and not output)
+M = 8; % nodes in a hidden layer
 
 % we have L + 1 weight matrices 
 Weights = cell(L+1, 1);
@@ -42,8 +51,8 @@ end
 Y = zeros(length(X), O); % store our predections for each datapoint
 Z = cell(L+1, 1); % tanh(activation)
 
-eta = 0.001; % learning rate
-number_of_epochs = 25;
+eta = 0.1; % learning rate
+number_of_epochs = 200;
 
 mean_error_per_epoch = zeros(number_of_epochs, 1);
 for epoch = 1:number_of_epochs
@@ -69,19 +78,20 @@ for epoch = 1:number_of_epochs
 %         Y(i,:) = [a,b];
         
         % backpropagation
-        Deltas{end} = mean(Y(mini_batch_range,:) - T(mini_batch_range,:)); % delta_k
+        Deltas{end} = mean(Y(mini_batch_range,:) - T(mini_batch_range,:), 1); % delta_k
+        
         [class_value, index] = max(T(mini_batch_range,:)');
         [max_logit, prediction] = max(Y(mini_batch_range,:)');
         total_error(mini_batch_range) = prediction ~= index;
         for j=L:-1:1
-            Deltas{j} = (1 - mean(Z{j}).^2) .* (Weights{j+1} * Deltas{j+1}')';
+            Deltas{j} = (1 - mean(Z{j}, 1).^2) .* (Weights{j+1} * Deltas{j+1}')';
         end
         
         % update weights and biases
-        Weights{1} = Weights{1} - ( mean(x)'* Deltas{1} * eta);
+        Weights{1} = Weights{1} - (mean(x,1)'* Deltas{1} * eta);
         Bias{1} = Bias{1} - eta * Deltas{1}'; %assumption
         for j=2:L+1
-            Weights{j} = Weights{j} - (eta * Deltas{j}' * mean(Z{j-1}))';
+            Weights{j} = Weights{j} - (eta * Deltas{j}' * mean(Z{j-1}, 1))';
             Bias{j} = Bias{j} - eta * Deltas{j}';
         end
         
