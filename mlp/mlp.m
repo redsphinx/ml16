@@ -5,7 +5,7 @@ X = reshape(X, size(X,1)^2, size(X,3))';
 X = X>0;
 [matching_table, T] = ohe(T); 
 % TODO: change code to handle different learning methods
-mini_batch_size = 20;
+mini_batch_size = 64;
 % make things fit the mini batch size so that we don't get weird results.
 X=X(1:length(X) - mod(length(X),mini_batch_size),:);
 T=T(1:length(X),:);
@@ -13,8 +13,8 @@ T=T(1:length(X),:);
 % implement neural net
 D = size(X,2); % nodes in input layer
 O = size(T,2); % nodes in output layer. we have 2 classes
-L = 5; % number of hidden layers (so not input and not output)
-M = 64; % nodes in a hidden layer
+L = 6; % number of hidden layers (so not input and not output)
+M = 256; % nodes in a hidden layer
 
 % we have L + 1 weight matrices 
 Weights = cell(L+1, 1);
@@ -42,14 +42,18 @@ end
 Y = zeros(length(X), O); % store our predections for each datapoint
 Z = cell(L+1, 1); % tanh(activation)
 
-eta = 0.01; % learning rate
-number_of_epochs = 5;
+eta = 0.001; % learning rate
+number_of_epochs = 25;
 
 mean_error_per_epoch = zeros(number_of_epochs, 1);
 for epoch = 1:number_of_epochs
     epoch
     total_error = zeros(length(X),1);
     Deltas = cell(L+1,1); % store the errors
+    % shuffle data
+    shuffle = randperm(length(X));
+    X = X(shuffle,:);
+    T = T(shuffle,:);
     for i = 1:mini_batch_size:length(X)
         mini_batch_range = i:i+mini_batch_size-1;
         % forward pass
