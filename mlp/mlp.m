@@ -6,7 +6,7 @@ X = X>0; % treshold X
 [matching_table, T] = ohe(T); 
 LEARNING_METHODS = {'gd', 'sgd'}; % id of these is the learning method, 1 for gd, 2 for sgd.
 LEARNING_METHOD = 1;
-USE_MOMENTUM = 1; % 1=momentum is used, 0=momentum is not used
+USE_MOMENTUM = 0; % 1=momentum is used, 0=momentum is not used
 momentum_parameter = 0.5;
 
 mini_batch_size = 64;
@@ -29,7 +29,7 @@ M = 64; % nodes in a hidden layer
 [Weights, Bias, Y, Z] = initialize_matrices(D, O, L, M, X);
 
 eta = 0.0001; % learning rate
-number_of_epochs = 100;
+number_of_epochs = 30;
 
 mean_error_per_epoch = zeros(number_of_epochs, 1);
 for epoch = 1:number_of_epochs
@@ -71,10 +71,10 @@ for epoch = 1:number_of_epochs
         % updating weights and biases
         % -----------------------------------------------------------------
         if USE_MOMENTUM
-            Weights{1} = Weights{1} + (mean(x,1)'* Deltas{1} * eta) + ...
+            Weights{1} = Weights{1} - (mean(x,1)'* Deltas{1} * eta) - ...
                          momentum_parameter * Delta_Weights{1};
             Delta_Weights{1} = mean(x,1)'* Deltas{1} * eta;
-            Bias{1} = Bias{1} + eta * Deltas{1}' + momentum_parameter * ...
+            Bias{1} = Bias{1} - eta * Deltas{1}' - momentum_parameter * ...
                       Delta_Bias{1};
             Delta_Bias{1} = eta * Deltas{1}';
             for j=2:L+1
@@ -99,3 +99,4 @@ plot(1:number_of_epochs, abs(mean_error_per_epoch))
 axis square
 xlabel('epoch')
 ylabel('error')
+title(strcat('Learning Method=',LEARNING_METHODS(LEARNING_METHOD), ', Momentum=', num2str(USE_MOMENTUM)))
