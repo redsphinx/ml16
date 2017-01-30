@@ -6,7 +6,7 @@ X = X>0; % treshold X
 [matching_table, T] = ohe(T); 
 LEARNING_METHODS = {'gd', 'sgd'}; % id of these is the learning method, 1 for gd, 2 for sgd.
 LEARNING_METHOD = 1;
-MOMENTUM = 1; % 1=momentum is used, 0=momentum is not used
+USE_MOMENTUM = 1; % 1=momentum is used, 0=momentum is not used
 momentum_parameter = 0.5;
 
 mini_batch_size = 64;
@@ -22,19 +22,26 @@ T=T(1:length(X),:);
 % network architecture parameters
 D = size(X,2); % nodes in input layer
 O = size(T,2); % nodes in output layer. we have 2 classes
-L = 1; % number of hidden layers (so not input and not output)
-M = 8; % nodes in a hidden layer
+L = 4; % number of hidden layers (so not input and not output)
+M = 64; % nodes in a hidden layer
 
 %initialize Weights, Bias, predictions Y and activations Z
 [Weights, Bias, Y, Z] = initialize_matrices(D, O, L, M, X);
 
-eta = 0.1; % learning rate
-number_of_epochs = 200;
+eta = 0.0001; % learning rate
+number_of_epochs = 100;
 
 mean_error_per_epoch = zeros(number_of_epochs, 1);
 for epoch = 1:number_of_epochs
     epoch
     total_error = zeros(length(X),1);
+    Delta_Weights = cell(L+1, 1); % store the weight differences
+    Delta_Bias = cell(L+1, 1); % store the bias differences
+    % initialize with 0
+    for layer=1:L+1
+        Delta_Weights{layer} = Weights{layer} * 0;
+        Delta_Bias{layer} = Bias{layer} * 0;
+    end
     Deltas = cell(L+1,1); % store the errors
     shuffle = randperm(length(X)); % shuffle data
     X = X(shuffle,:);
@@ -54,7 +61,6 @@ for epoch = 1:number_of_epochs
         % backpropagation
         % -----------------------------------------------------------------
         Deltas{end} = mean(Y(mini_batch_range,:) - T(mini_batch_range,:), 1); % delta_k
-        
         [class_value, index] = max(T(mini_batch_range,:)');
         [max_logit, prediction] = max(Y(mini_batch_range,:)');
         total_error(mini_batch_range) = prediction ~= index;
@@ -64,12 +70,27 @@ for epoch = 1:number_of_epochs
         % -----------------------------------------------------------------
         % updating weights and biases
         % -----------------------------------------------------------------
-        Weights{1} = Weights{1} - (mean(x,1)'* Deltas{1} * eta);
-        Bias{1} = Bias{1} - eta * Deltas{1}'; %assumption
-        for j=2:L+1
-            Weights{j} = Weights{j} - (eta * Deltas{j}' * mean(Z{j-1}, 1))';
-            Bias{j} = Bias{j} - eta * Deltas{j}';
-        end        
+        if USE_MOMENTUM
+            Weights{1} = Weights{1} + (mean(x,1)'* Deltas{1} * eta) + ...
+                         momentum_parameter * Delta_Weights{1};
+            Delta_Weights{1} = mean(x,1)'* Deltas{1} * eta;
+            Bias{1} = Bias{1} + eta * Deltas{1}' + momentum_parameter * ...
+                      Delta_Bias{1};
+            Delta_Bias{1} = eta * Deltas{1}';
+            for j=2:L+1
+                Weights{j} = Weights{j} - (eta * Deltas{j}' * mean(Z{j-1}, 1))';
+                Delta_Weights{j} = mean(x,1)'* Deltas{j} * eta;
+                Bias{j} = Bias{j} - eta * Deltas{j}';
+                Delta_Bias{j} = eta * Deltas{j}';
+            end 
+        else
+            Weights{1} = Weights{1} - (mean(x,1)'* Deltas{1} * eta);
+            Bias{1} = Bias{1} - eta * Deltas{1}'; %assumption
+            for j=2:L+1
+                Weights{j} = Weights{j} - (eta * Deltas{j}' * mean(Z{j-1}, 1))';
+                Bias{j} = Bias{j} - eta * Deltas{j}';
+            end 
+        end           
     end
     mean_error_per_epoch(epoch) = mean(total_error); % accuracy
 end
