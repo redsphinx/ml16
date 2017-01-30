@@ -4,17 +4,25 @@ clear
 X = reshape(X, size(X,1)^2, size(X,3))';
 X = X>0; % treshold X
 [matching_table, T] = ohe(T); 
-LEARNING_METHODS = {'gd', 'sgd', 'cgd'}; % id of these is the learning method, 1 for gd, 2 for sgd, 3 for cgd
+% gd    = vanilla / batch gradient descent
+% sgd   = stochastic gradient descent
+% mbgd  = mini-batch gradient descent
+% cgd   = conjugated gradient descent
+LEARNING_METHODS = {'gd', 'sgd', 'mbgd', 'cgd'};
 LEARNING_METHOD = 1;
 USE_MOMENTUM = 0; % 1=momentum is used, 0=momentum is not used
 momentum_parameter = 0.5;
 
 mini_batch_size = 64;
 
-if LEARNING_METHOD == 2
-%     mini_batch_size = length(X);
+if LEARNING_METHOD == 1
+	mini_batch_size = length(X);
+elseif LEARNING_METHOD == 2
     mini_batch_size = 1;
-
+elseif LEARNING_METHOD == 3
+    mini_batch_size = 64;
+elseif LEARNING_METHOD == 4
+    mini_batch_size = 1;
 end
 
 % make things fit the mini batch size so that we don't get weird results.
