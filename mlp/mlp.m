@@ -9,7 +9,7 @@ X = X>0; % treshold X
 % mbgd  = mini-batch gradient descent
 % cgd   = conjugated gradient descent
 LEARNING_METHODS = {'gd', 'sgd', 'mbgd', 'cgd'};
-LEARNING_METHOD = 1;
+LEARNING_METHOD = 4;
 USE_MOMENTUM = 0; % 1=momentum is used, 0=momentum is not used
 momentum_parameter = 0.5;
 
@@ -39,7 +39,7 @@ M = 64; % nodes in a hidden layer
 [Weights, Bias, Y, Z] = initialize_matrices(D, O, L, M, X);
 
 eta = 0.0001; % learning rate
-number_of_epochs = 30;
+number_of_epochs = 5;
 
 mean_error_per_epoch = zeros(number_of_epochs, 1);
 for epoch = 1:number_of_epochs
@@ -47,12 +47,14 @@ for epoch = 1:number_of_epochs
     total_error = zeros(length(X),1);
     Delta_Weights = cell(L+1, 1); % store the weight differences
     Delta_Bias = cell(L+1, 1); % store the bias differences
+    Deltas = cell(L+1,1); % store the errors
+    old_Deltas = cell(L+1,1); % store the previous Deltas
     % initialize with 0
     for layer=1:L+1
         Delta_Weights{layer} = Weights{layer} * 0;
         Delta_Bias{layer} = Bias{layer} * 0;
+%         old_Deltas{layer} = Deltas{layer} * 0;
     end
-    Deltas = cell(L+1,1); % store the errors
     shuffle = randperm(length(X)); % shuffle data
     X = X(shuffle,:);
     T = T(shuffle,:);
@@ -80,27 +82,47 @@ for epoch = 1:number_of_epochs
         % -----------------------------------------------------------------
         % updating weights and biases
         % -----------------------------------------------------------------
-        if USE_MOMENTUM
-            Weights{1} = Weights{1} - (mean(x,1)'* Deltas{1} * eta) - ...
-                         momentum_parameter * Delta_Weights{1};
-            Delta_Weights{1} = mean(x,1)'* Deltas{1} * eta;
-            Bias{1} = Bias{1} - eta * Deltas{1}' - momentum_parameter * ...
-                      Delta_Bias{1};
-            Delta_Bias{1} = eta * Deltas{1}';
-            for j=2:L+1
-                Weights{j} = Weights{j} - (eta * Deltas{j}' * mean(Z{j-1}, 1))';
-                Delta_Weights{j} = mean(x,1)'* Deltas{j} * eta;
-                Bias{j} = Bias{j} - eta * Deltas{j}';
-                Delta_Bias{j} = eta * Deltas{j}';
-            end 
+        if i==1
+            for layer=1:L+1
+               old_Deltas{layer} = Deltas{layer} * 0;
+            end
+        end
+        if LEARNING_METHOD == 4
+            for j = 1:L+1
+                lambda = 1; % don't know how to compute lambda
+                d0 = old_Deltas{j};
+                Beta = (Deltas{j} - old_Deltas{j}).*Deltas{j};
+                d1 = Deltas{j} + Beta.*d0;
+                Weights{j} = Weights{j} + repmat(lambda*d1,size(Weights{j}, 1), 1);
+                Bias{j} = Bias{j} + (lambda*d1)';
+            end
+            old_Deltas = Deltas;
         else
-            Weights{1} = Weights{1} - (mean(x,1)'* Deltas{1} * eta);
-            Bias{1} = Bias{1} - eta * Deltas{1}';
-            for j=2:L+1
-                Weights{j} = Weights{j} - (eta * Deltas{j}' * mean(Z{j-1}, 1))';
-                Bias{j} = Bias{j} - eta * Deltas{j}';
+            if USE_MOMENTUM
+                Weights{1} = Weights{1} - (mean(x,1)'* Deltas{1} * eta) - ...
+                             momentum_parameter * Delta_Weights{1};
+                Delta_Weights{1} = mean(x,1)'* Deltas{1} * eta;
+                Bias{1} = Bias{1} - eta * Deltas{1}' - momentum_parameter * ...
+                          Delta_Bias{1};
+                Delta_Bias{1} = eta * Deltas{1}';
+                for j=2:L+1
+                    Weights{j} = Weights{j} - (eta * Deltas{j}' * mean(Z{j-1}, 1))';
+                    Delta_Weights{j} = mean(x,1)'* Deltas{j} * eta;
+                    Bias{j} = Bias{j} - eta * Deltas{j}';
+                    Delta_Bias{j} = eta * Deltas{j}';
+                end 
+            else
+                Weights{1} = Weights{1} - (mean(x,1)'* Deltas{1} * eta);
+                Bias{1} = Bias{1} - eta * Deltas{1}';
+                for j=2:L+1
+                    Weights{j} = Weights{j} - (eta * Deltas{j}' * mean(Z{j-1}, 1))';
+                    Bias{j} = Bias{j} - eta * Deltas{j}';
+                end 
             end 
-        end           
+        end
+        
+        
+          
     end
     mean_error_per_epoch(epoch) = mean(total_error); % accuracy
 end
