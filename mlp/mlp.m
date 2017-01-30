@@ -4,7 +4,7 @@ clear
 X = reshape(X, size(X,1)^2, size(X,3))';
 X = X>0; % treshold X
 [matching_table, T] = ohe(T); 
-LEARNING_METHODS = {'gd', 'sgd'}; % id of these is the learning method, 1 for gd, 2 for sgd.
+LEARNING_METHODS = {'gd', 'sgd', 'cgd'}; % id of these is the learning method, 1 for gd, 2 for sgd, 3 for cgd
 LEARNING_METHOD = 1;
 USE_MOMENTUM = 0; % 1=momentum is used, 0=momentum is not used
 momentum_parameter = 0.5;
@@ -12,7 +12,9 @@ momentum_parameter = 0.5;
 mini_batch_size = 64;
 
 if LEARNING_METHOD == 2
-    mini_batch_size = length(X);
+%     mini_batch_size = length(X);
+    mini_batch_size = 1;
+
 end
 
 % make things fit the mini batch size so that we don't get weird results.
@@ -85,7 +87,7 @@ for epoch = 1:number_of_epochs
             end 
         else
             Weights{1} = Weights{1} - (mean(x,1)'* Deltas{1} * eta);
-            Bias{1} = Bias{1} - eta * Deltas{1}'; %assumption
+            Bias{1} = Bias{1} - eta * Deltas{1}';
             for j=2:L+1
                 Weights{j} = Weights{j} - (eta * Deltas{j}' * mean(Z{j-1}, 1))';
                 Bias{j} = Bias{j} - eta * Deltas{j}';
