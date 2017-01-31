@@ -1,4 +1,5 @@
 function [matching_table, T] = ohe(T)
+%create one hot encoding for T
     classes = unique(T);
     ohe_T = zeros(length(T), length(classes));
     matching_table = [[1;0] classes ]; % for future reference
