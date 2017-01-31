@@ -132,3 +132,20 @@ for method = 1:3
         testing_results_per_epoch(method, epoch) = test_error;
     end 
 end
+
+% plot the results
+hold on
+plot(1:100,testing_results_per_epoch(1,:), 'r')
+plot(1:100,training_results_per_epoch(1,:), 'r-')
+
+plot(1:100,testing_results_per_epoch(2,:), 'g')
+plot(1:100,training_results_per_epoch(2,:), 'g-')
+
+plot(1:100,testing_results_per_epoch(3,:), 'b')
+plot(1:100,training_results_per_epoch(3,:), 'b-')
+
+legend('GD test','GD train','SGD test','SGD train','MBGD test','MBGD train',)
+
+xlabel('epoch')
+ylabel('error')
+title('comparing different methods using momentum')
