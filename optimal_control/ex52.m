@@ -2,26 +2,27 @@ clear
 figure
 
 % Initialise
-dt = 0.2:0.2:2;
-nus = 1:.1:10;
-x = 1;
-clr = jet(numel(dt));
-legends = cell(1, numel(dt));
+dt = 0:0.01:2;
+nus = 1:10;
+x = 0.5;
+clr = jet(numel(nus));
+legends = cell(1, numel(nus));
 hold on
 
-for d_idx = 1:numel(dt)
+for inu = 1:numel(nus)
     % Compute control strategy
-    d = dt(d_idx);
-    th = tanh(x ./ (nus*d) - x)/d;
+    nu = nus(inu);
+    th = tanh(x ./ (nu*dt) - x) ./ dt;
     
     % Plot it
-    plot(nus, th, 'Color', clr(d_idx, :));
-    legends{d_idx} = strcat('T-t=',num2str(d));
+    plot(dt, th, 'Color', clr(inu, :));
+    legends{inu} = sprintf('\\nu = %i', nu);
 end
 
 legend(legends)
-xlabel('\nu');
-ylabel('u(x=1,t)');
-title('Control strategies for different noise levels and time horizons')
+xlabel('T-t');
+set(gca, 'XDir', 'reverse');
+ylabel('u(x=0.5,t)');
+title('Control strategies for different noise levels')
 
 hold off
