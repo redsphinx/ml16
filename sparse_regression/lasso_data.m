@@ -1,6 +1,6 @@
 % Parameter settings
 maxgamma = 10;    % numgammas gamma values in the range
-numgammas = 250;  % maxgamma to epsilon*maxgamma
+numgammas = 1000;  % maxgamma to epsilon*maxgamma
 epsilon = 0.0001; % are tested for both ridge regr. and lasso.
 T = 2500;         % max. #iterations lasso
 tolerance = 1e-6; % L2-norm threshold for convergence
