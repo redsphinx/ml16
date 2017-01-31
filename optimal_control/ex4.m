@@ -5,11 +5,13 @@ nus = 1:1:20;
 dt = 0.01;
 Ts = [1 2 5 10];
 
+% Plot controlled trajectories for a number of T-nu combinations
 for iT=1:numel(Ts)
     T = Ts(iT);
     subplot(2,2,iT)
 
     for n=1:numel(nus)
+        % Initialise run
         nu =  nus(n);
         u = @(x,t) (tanh(x ./ (nu*(T-t))) - x) ./ (T-t);
         rng(1)
@@ -20,25 +22,22 @@ for iT=1:numel(Ts)
         uhist = NaN(1, numel(ts));
 
         for i=1:numel(ts)    
+            % Execute dynamics
             t = ts(i);
             xhist(i) = x;
             uhist(i) = u(x,t);
 
             dxi = randn(1) * sqrt(nu*dt);
             x = x + uhist(i)*dt + dxi;
-    end
+        end
 
-    % plot(ts, xhist, ts, uhist)
-    nuspread = 2*(max(nus) - min(nus));
-    color = @(i) [0.5+(i-min(nus))/nuspread, 0.5-(i-min(nus))/nuspread, 0.5-(i-min(nus))/nuspread];
-
-
-    plot(ts, xhist, 'Color', color(nu))
-    hold on
-
-    % hold off
-    % legend('x', 'zero axis', 'targets', 'Location', 'southwest')
-    % title(strcat({'Optimal Control, nu='},num2str(nu), {', T='},num2str(T)))
+        % Colour coding
+        nuspread = 2*(max(nus) - min(nus));
+        color = @(i) [0.5+(i-min(nus))/nuspread, 0.5-(i-min(nus))/nuspread, 0.5-(i-min(nus))/nuspread];
+        
+        % Plot(ts, xhist, ts, uhist)
+        plot(ts, xhist, 'Color', color(nu))
+        hold on
     end
 
     plot([0 T], [0 0], '--', 'Color', [0.5 0.5 0.5])
@@ -49,10 +48,11 @@ for iT=1:numel(Ts)
     xlim([T-1 T]);
 end
 
-suptitle('suuuper')
+suptitle('Controlled trajectories for different time horizons and noise levels')
 
+% Display colorbar properly
 cmap = reshape(color(nus), [numel(nus) 3]);
 colormap(cmap);
-cbh = colorbar('peer', gca, [0.924414348462665 0.106870229007634 0.0183016105417277 0.743002544529263]);
+cbh = colorbar('Position', [0.924414348462665 0.106870229007634 0.0183016105417277 0.743002544529263]);
 set(cbh, 'YTickLabel', char(arrayfun(@num2str, get(cbh, 'YTick') + min(nus)-1, 'UniformOutput', false)));
 ylabel(cbh, 'nu')
