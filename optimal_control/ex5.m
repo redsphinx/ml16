@@ -1,5 +1,4 @@
 clear
-clc
 
 % Arena parameters
 valleywidth = 2;
@@ -22,16 +21,14 @@ L = @(x) -1 -0.5*(tanh(2*x + 2) - tanh(2*x - 2));
 Lderiv = @(x) sech(2 - 2*x).^2 - sech(2*x + 2).^2;
 Fg = @(x) (-g*Lderiv(x)) ./ sqrt(1 + Lderiv(x).^2);
 
-%{
+% Plot valley, slope, gravity
+figure
 xs = -valleywidth:0.01:valleywidth;
 plot(xs, L(xs), xs, Lderiv(xs), xs, Fg(xs));
-legend('L', 'L''', 'Fg')
+legend('valley', 'slope', 'gravity')
 xlabel('x')
-%}
 
 % Prepare measurements
-
-
 constant_numel_xs = numel(xs);
 constant_numel_vs = numel(vs);
 
@@ -44,8 +41,9 @@ parfor ix = 1:constant_numel_xs
         maxhist = NaN(1, numtries);
 
         for seed=1:numtries
-            rng(seed+238765);
+            rng(seed+238765); % reproducability
 
+            % Initialisation
             x = xs(ix);
             v = vs(iv);
             ts = 0:dt:T;
@@ -54,6 +52,8 @@ parfor ix = 1:constant_numel_xs
             vhist = NaN(1, numel(ts));
 
             for i=1:numel(ts)
+                % Execute dynamics
+                
                 t = ts(i);
 
                 u = 0;
@@ -66,22 +66,19 @@ parfor ix = 1:constant_numel_xs
                 v = Fg(x)*dt + u*dt + dxi;
             end
 
-            %plot(ts, xhist);
-            %legend('x')
             phihist(ix, iv, seed) = A * (abs(x) > valleywidth); 
-
-            % maxhist(seed) = max(abs(xhist));
         end
-
-        % boxplot(maxhist)
     end
 end
 
+% Compute cost-to-go J
 lambda = 0.1 * nu;
 Jtable = -lambda * log(sum(exp(-phihist/lambda), 3)/numtries);
 
+% Plot cost-to-go J
 [X,V] = ndgrid(xs,vs);
 surf(X, V, Jtable)
 xlabel('x')
 ylabel('v')
 zlabel('J')
+title('Cost-to-go J for different initial positions, velocities')

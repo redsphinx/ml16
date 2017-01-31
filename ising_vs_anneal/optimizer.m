@@ -23,7 +23,7 @@ for run_id=1:8
     METHOD = METHODS{bin2dec(config(3))+1};
     configs(run_id, :) = {run_id, COUPLING, NEIGHBORHOODSIZE, METHOD};
 end
-%%
+
 E_all_all = zeros(num_runs,n_restart);
 COUPLING = 'frustrated';
 NEIGHBORHOODSIZE = 2;

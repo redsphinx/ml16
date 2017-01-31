@@ -1,2 +1,6 @@
 *.png
 *~
+*.mat
+mlp/results/*
+mlp/experiments.m
+
