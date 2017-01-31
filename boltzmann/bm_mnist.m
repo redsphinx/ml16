@@ -53,5 +53,10 @@ end
 now - start
 %%
 % accuracy = 0.7574
-sum(results == mnist.test_labels)/test_image_count
-
+per_class_accuracies = zeros(1,num_classes);
+for digit = 0:9
+    class_indices = labels == digit;
+    per_class_accuracies(digit+1) = mean(results(class_indices, :) == labels(class_indices, :));
+end
+mean(results == labels)
+per_class_accuracies
