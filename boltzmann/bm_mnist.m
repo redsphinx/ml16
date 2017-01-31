@@ -17,25 +17,27 @@ N = 28*28;
 load('mnistAll.mat');
 
     
-
-for noise_level = 0.15:0.01:0.2
-    rng(2023)
+% testing different noise levels
+for noise_level = 0:0.01:0.2
     %% weight calculation
+    % weights per class
     w = zeros(N,N,num_classes);
     theta = zeros(N,num_classes);
+    % F per class
     F = zeros(1, num_classes);
     for i = 1:10
         % get data belonging to class i
         training_data = mnist.train_images(:, :, mnist.train_labels == i-1);
         % add noise
         training_data = double(training_data) + double(rand(size(training_data)) <= noise_level);
-        % thresholding
+        % threshold and binarize
         training_data = double(reshape(training_data, N, size(training_data, 3)) > 0);
         % mean of training data or clamped statistics for class i
         m = sum(training_data, 2)/size(training_data, 2);
         clamped_state_coupling_expectations = training_data * training_data' / size(training_data,2);
         C = clamped_state_coupling_expectations - m * m';
 
+        % Calculate the parameters per class.
         % C is a singular matrix, so inv(C) is invalid. That's why we're using
         % pinv here.
         w(:,:,i) = eye(N) .* repmat((1 - m.^2), 1, N) - pinv(C);
@@ -44,7 +46,7 @@ for noise_level = 0.15:0.01:0.2
             sum((1 + m) .* log(0.5 * (1 + m)) + (1 - m) .* log(0.5 * (1 - m)));
     end
     %% Classification
-    start = now;
+    % Running the classification only for first 500 results.
     test_images = mnist.test_images(:,:,1:500);
     test_labels = mnist.test_labels(1:500);
     test_image_count = size(test_images, 3);
@@ -54,15 +56,15 @@ for noise_level = 0.15:0.01:0.2
     parfor a = 1:test_image_count
         test_image = test_images(:,:,a);
         test_label = test_labels(a);
+        test_image = double(test_image) + double(rand(size(test_image)) <= noise_level);
         binarized_image = double(test_image > 0);
         s = reshape(binarized_image, N, 1);
         logp_per_class = F + reshape(s*s', 1, N*N) * w_flat  + s' * theta;
         [logp, class] = max(logp_per_class);
         results(a) = class - 1;
     end
-    now - start
-    %%
-    % accuracy = 0.7574
+    %% Accuracy Calculation
+    %
     per_class_accuracies = zeros(1,num_classes);
     for digit = 0:9
         class_indices = test_labels == digit;
