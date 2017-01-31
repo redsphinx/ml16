@@ -69,7 +69,7 @@ fprintf('\nMSE Lasso: %g\nMSE ridge: %g\n\n', mselasso, mseridge);
 % Plots
 for in=1:n
     %semilogx(gammas, betas(:,in));
-    plot(norms, betaslasso(:,in));
+    plot(normslasso, betaslasso(:,in));
     hold on
 end
 hold off
@@ -82,7 +82,7 @@ title('LASSO-derived coefficients for different values of \gamma')
 figure
 for in=1:n
     semilogx(gammas, betas(:,in));
-    %plot(norms, betasridge(:,in));
+    %plot(normsridge, betasridge(:,in));
     hold on
 end
 hold off
