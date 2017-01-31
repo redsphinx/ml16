@@ -1,6 +1,6 @@
 % Parameter settings
 maxgamma = 10;    % numgammas gamma values in the range
-numgammas = 250;  % maxgamma to epsilon*maxgamma
+numgammas = 1000;  % maxgamma to epsilon*maxgamma
 epsilon = 0.0001; % are tested for both ridge regr. and lasso.
 T = 2500;         % max. #iterations lasso
 tolerance = 1e-6; % L2-norm threshold for convergence
@@ -68,8 +68,8 @@ fprintf('\nMSE Lasso: %g\nMSE ridge: %g\n\n', mselasso, mseridge);
 
 % Plots
 for in=1:n
-    %semilogx(gammas, betas(:,in));
-    plot(norms, betaslasso(:,in));
+    %semilogx(gammas, betaslasso(:,in));
+    plot(normslasso, betaslasso(:,in));
     hold on
 end
 hold off
@@ -81,8 +81,8 @@ title('LASSO-derived coefficients for different values of \gamma')
 
 figure
 for in=1:n
-    semilogx(gammas, betas(:,in));
-    %plot(norms, betasridge(:,in));
+    semilogx(gammas, betasridge(:,in));
+    %plot(normsridge, betasridge(:,in));
     hold on
 end
 hold off
