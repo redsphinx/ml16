@@ -93,14 +93,15 @@ for coupl = 1:2
                     E_a(i) = E_min;
                 end
                 E_all_all(run_id, :) = E_a;
-        %         col=hsv(num_runs);
-        %         hold on
-        %         for a=1:num_runs
-        %             plot(E_all_all(a,:), 'color', col(a,:))
-        %         end
-        %         xlabel('Number of Restarts')
-        %         ylabel('E(x,w)')
-        %         title(strcat({'Frustrated with neighborhood '},num2str(NEIGHBORHOODSIZE)))
+                figure(cnt)
+                col=hsv(num_runs);
+                hold on
+                for a=1:num_runs
+                    plot(E_all_all(a,:), 'color', col(a,:))
+                end
+                xlabel('Number of Restarts')
+                ylabel('E(x,w)')
+                title(strcat(COUPLING,' with neighborhood ',num2str(NEIGHBORHOODSIZE)))
                 %only for ferromagnetic:
                 %optimal x is all ones or -ones. Compare this to our optimized x.
                 x_opt_p = ones(1,n);
@@ -194,8 +195,8 @@ for coupl = 1:2
                 xlabel('Temperature')
                 ylabel('Energy per spin')
                 title(strcat(COUPLING, ' neighborhood=', int2str(NEIGHBORHOODSIZE),', T1=',int2str(T1)));
-                cnt = cnt + 1;
             end;
+            cnt = cnt + 1;
             durations(run_id)=cputime - start_time;
         end;
     end
