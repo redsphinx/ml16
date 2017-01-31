@@ -136,17 +136,16 @@ for method = 1:3
         end
         mean_error_per_epoch(epoch) = mean(total_error);
         % calculate test error
-        Z_test = cell(L+1, 1); % tanh(activation)
-
-        for test_data=1:length(X_test)
-            x_test = X_test(test_data,:);
-            Z_test{1} = tanh(x_test * Weights{1} + Bias{1}');
-            for j=2:L+1
-                Z_test{j} = tanh(Z_test{j-1} * Weights{j} + Bias{j}') ;
-            end
-            Y_test(test_data,:) = Z_test{end};
+        
+        act = tanh(X_test * Weights{1} + repmat(Bias{1}', length(X_test),  1));
+        for j=2:L+1
+            act = tanh(act * Weights{j} + repmat(Bias{j}', length(X_test),  1)) ;
         end
-
+        Y_test = act;
+        [class_value, index] = max(T_test');
+        [max_logit, prediction] = max(Y_test');
+        test_error = mean(prediction ~= index);
+        
         training_results_learning_methods_per_epoch(method, epoch) = mean_error_per_epoch(epoch);
         % TODO: fix the way to calculate the test error down below
         testing_results_learning_methods_per_epoch(method, epoch) = mean(Y_test-T_test)
