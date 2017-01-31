@@ -2,6 +2,6 @@
 % Erdi Calli, Gabi Ras, Jordi Riemens
 
 ex4
+ex41
 ex5
 ex51
-ex52
