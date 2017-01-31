@@ -5,31 +5,23 @@ rng(42)
 % sgd   = stochastic gradient descent
 % mbgd  = mini-batch stochastic gradient descent
 
-MNIST = 0:1:9;
-list_pairs = nchoosek(MNIST, 2);
+% store data for each learning method
+training_results_per_epoch = zeros(3, 100);
+testing_results_per_epoch = zeros(3, 100);
 
-% test_result_pairs = zeros(length(list_pairs),1);
-% train_result_pairs = zeros(length(list_pairs),1);
-
-test_error_per_epoch = zeros(1,100);
-Ls = [8, 32, 64, 128, 256];
-training_results_per_epoch = zeros(5, 100);
-testing_results_per_epoch = zeros(5, 100);
-
-% for l = 1:5
-%     lyr = Ls(l);
-    a = 4; b=9;
+for method = 1:3
+    a = 1; b=8;
     [X, T] = create_training_data(a, b);
     [X_test, T_test] = create_testing_data(a, b);
     X = reshape(X, size(X,1)^2, size(X,3))';
     X_test = reshape(X_test, size(X_test,1)^2, size(X_test,3))';
     X = X>0; % treshold X
     X_test = X_test>0; % treshold X
-    [matching_table, T] = ohe(T); 
-    [matching_table, T_test] = ohe(T_test); 
+    T = ohe(T); 
+    T_test = ohe(T_test); 
     
     LEARNING_METHODS = {'gd', 'sgd', 'mbgd'};
-    LEARNING_METHOD = 3;
+    LEARNING_METHOD = method;
     USE_MOMENTUM = 1; % 1=momentum is used, 0=momentum is not used
     momentum_parameter = 0.5;
 
@@ -136,9 +128,7 @@ testing_results_per_epoch = zeros(5, 100);
         test_error = mean(prediction ~= index);
         test_error_per_epoch(epoch) = test_error;
         
-%         training_results_per_epoch(l, epoch) = mean_error_per_epoch(epoch);
-%         testing_results_per_epoch(l, epoch) = test_error;
+        training_results_per_epoch(method, epoch) = mean_error_per_epoch(epoch);
+        testing_results_per_epoch(method, epoch) = test_error;
     end 
-%     test_result_pairs(pair) = test_error;
-%     train_result_pairs(pair) = mean_error_per_epoch(end);
-% end
+end
