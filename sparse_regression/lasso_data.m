@@ -93,7 +93,7 @@ ylabel('\beta_i')
 title('Ridge regression coefficients for different values of \gamma')
 
 figure
-semilogx(gammas, sselasso, gammas, sseridge);
+semilogx(gammas, sselasso/sum(cvp.TestSize), gammas, sseridge/sum(cvp.TestSize));
 xlabel('\gamma')
 set(gca, 'XDir', 'reverse');
 ylabel('MSE')
